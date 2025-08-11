@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Global Operations Dashboard</title>
+    <meta name="description" content="Editable dashboard for Manufacturing, Supply Chain, Engineering, HR, and Country Operations. Sponsored by VP, India." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📊</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { brand: { DEFAULT: '#0ea5e9' }}}}};</script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <style>
+      /* Meeting mode reduces UI chrome */
+      body.meeting .edit-only { display: none !important; }
+      body.meeting .card { box-shadow: none !important; border-color: transparent !important; }
+      .drag-handle { cursor: grab; }
+      .modal-backdrop { background: rgba(0,0,0,0.4); }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <header class="bg-white border-b sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded bg-brand/10 flex items-center justify-center text-brand text-xl">🧭</div>
+          <div>
+            <h1 class="text-xl sm:text-2xl font-semibold">Global Operations Dashboard</h1>
+            <p class="text-xs text-gray-500">Sponsored by VP, India — optimized for executive meetings</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-meeting" class="px-3 py-2 rounded-md border text-sm bg-white hover:bg-gray-50">Meeting mode</button>
+          <button id="btn-fullscreen" class="px-3 py-2 rounded-md border text-sm bg-white hover:bg-gray-50 edit-only">Fullscreen</button>
+          <button id="btn-save" class="px-3 py-2 rounded-md bg-brand text-white text-sm shadow-sm edit-only">Save</button>
+          <button id="btn-reset" class="px-3 py-2 rounded-md border text-sm bg-white hover:bg-gray-50 text-red-600 edit-only">Reset view</button>
+        </div>
+      </div>
+      <div class="bg-gray-50/80 border-t">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Department view</label>
+            <select id="select-dept" class="w-full border rounded-md px-2.5 py-2 bg-white">
+              <option value="all">All Functions</option>
+              <option value="manufacturing">Manufacturing</option>
+              <option value="supply_chain">Supply Chain</option>
+              <option value="engineering">Engineering</option>
+              <option value="hr">HR</option>
+              <option value="country_ops">Country Operations</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Country / Region</label>
+            <select id="select-country" class="w-full border rounded-md px-2.5 py-2 bg-white">
+              <option value="global">Global</option>
+              <option value="india" selected>India (Lead)</option>
+              <option value="usa">USA</option>
+              <option value="emea">EMEA</option>
+              <option value="apac">APAC</option>
+              <option value="latam">LATAM</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 flex items-end gap-2">
+            <button id="btn-add" class="px-3 py-2 rounded-md border text-sm bg-white hover:bg-gray-50 edit-only">Add widget</button>
+            <div class="text-xs text-gray-500">Drag by the handle to reorder. Edits are saved per view.</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <section id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 min-h-[40vh]">
+        <!-- Widgets render here -->
+      </section>
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div id="modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+      <div class="absolute inset-0 modal-backdrop"></div>
+      <div class="relative bg-white rounded-lg shadow-xl w-[95vw] max-w-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 id="modal-title" class="text-lg font-semibold">Add widget</h2>
+          <button id="modal-close" class="text-gray-500 hover:text-gray-700">✕</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Type</label>
+            <select id="field-type" class="w-full border rounded-md px-2.5 py-2 bg-white">
+              <option value="kpi">KPI</option>
+              <option value="chart">Chart</option>
+              <option value="table">Table</option>
+              <option value="notes">Notes</option>
+              <option value="risk">Risk</option>
+              <option value="okr">OKR</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Size</label>
+            <select id="field-size" class="w-full border rounded-md px-2.5 py-2 bg-white">
+              <option value="sm">Small</option>
+              <option value="md" selected>Medium</option>
+              <option value="lg">Large</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs text-gray-600 mb-1">Title</label>
+            <input id="field-title" class="w-full border rounded-md px-2.5 py-2" placeholder="Widget title" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs text-gray-600 mb-1">Content (JSON or text)</label>
+            <textarea id="field-content" class="w-full border rounded-md px-2.5 py-2 h-32" placeholder='{"value": 97, "unit": "%"} or free text'></textarea>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center justify-end gap-2">
+          <button id="modal-cancel" class="px-3 py-2 rounded-md border text-sm bg-white hover:bg-gray-50">Cancel</button>
+          <button id="modal-save" class="px-3 py-2 rounded-md bg-brand text-white text-sm shadow-sm">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <p class="text-xs text-gray-400">© <span id="year"></span> Global Company. VP, India leads this initiative across Manufacturing, Supply Chain, Engineering, HR, and Country Operations.</p>
+    </footer>
+
+    <script src="./main.js" type="module"></script>
+  </body>
+</html>
