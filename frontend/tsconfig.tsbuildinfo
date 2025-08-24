@@ -1,0 +1,1 @@
+{"root":["./src/main.tsx","./src/router.tsx","./src/vite-env.d.ts","./src/ui/AppLayout.tsx","./src/views/GrafanaPage.tsx","./src/views/HomePage.tsx","./src/views/RPOCPage.tsx","./src/web/apiClient.ts","./src/widgets/GrafanaEmbed.tsx"],"version":"5.9.2"}
